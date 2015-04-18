@@ -7,6 +7,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <param-value>
     	/WEB-INF/mvc-dispatcher-servlet.xml
     	/WEB-INF/security.xml
+    	/WEB-INF/service.xml
     </param-value>
     
   </context-param>
@@ -30,17 +31,18 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 	</servlet-mapping>
 	
 	<filter> 
-<filter-name>springSecurityFilterChain</filter-name> 
-<filter-class> 
-org.springframework.web.filter.DelegatingFilterProxy 
-</filter-class> 
-</filter> 
-<filter-mapping> 
-<filter-name>springSecurityFilterChain</filter-name> 
-<url-pattern>/*</url-pattern> 
-</filter-mapping> 
+		<filter-name>springSecurityFilterChain</filter-name> 
+		<filter-class> 
+			org.springframework.web.filter.DelegatingFilterProxy 
+		</filter-class> 
+	</filter> 
 	
-	  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-  </welcome-file-list>
+	<filter-mapping> 
+		<filter-name>springSecurityFilterChain</filter-name> 
+		<url-pattern>/*</url-pattern> 
+	</filter-mapping> 
+	
+	<welcome-file-list>
+    	<welcome-file>index.html</welcome-file>
+  	</welcome-file-list>
 </web-app>
