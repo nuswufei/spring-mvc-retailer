@@ -16,16 +16,39 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import DAOImpl.UsersDAOImpl;
-import entity.Users;
+import DAOImpl.*;
+import entity.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/*")
 public class MVCController {
-	private UsersDAOImpl usersDAO;
 	@Autowired
+	private AccountDAOImpl accountDAO;
+	
+	@Autowired
+	private AuthoritiesDAOImpl authoritiesDAO;
+	
+	@Autowired
+	private CustomerDAOImpl customerDAO;
+	
+	@Autowired
+	private OrderDAOImpl orderDAO;
+	
+	@Autowired
+	private ProductDAOImpl productDAO;
+	
+	@Autowired
+	private SupplierDAOImpl supplierDAO;
+	
+	@Autowired
+	private SupplierProductDAOImpl supplierProductDAO;
+	
+	@Autowired
+	private UsersDAOImpl usersDAO;
+	
+	
 	@ResponseBody
 	@RequestMapping(value="registration", method= RequestMethod.POST) 
 	@Transactional
@@ -34,7 +57,6 @@ public class MVCController {
 			@PathVariable("password") String password,
 			@PathVariable("name") String name,
 			@PathVariable("address") String address) {
-		this.usersDAO = usersDAO;
 		Users users = new Users();
 		users.setENABLED(1);
 		users.setPassword(password);

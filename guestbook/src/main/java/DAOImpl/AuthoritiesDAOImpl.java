@@ -3,7 +3,6 @@ package DAOImpl;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import entity.Authorities;
-import entity.Users;
 import DAO.AuthoritiesDAO;
 
 public class AuthoritiesDAOImpl implements AuthoritiesDAO{
@@ -17,7 +16,7 @@ public class AuthoritiesDAOImpl implements AuthoritiesDAO{
 	}
 	@Override
 	public void insert(Authorities authorities) {
-		String sql = "INSERT IGNORE INTO authorites " +
+		String sql = "INSERT INTO authorites " +
 					"(USERNAME, AUTHORITY) "
 					+ "VALUES (?, ?)";
 		jdbcTemplate.update(sql, 
