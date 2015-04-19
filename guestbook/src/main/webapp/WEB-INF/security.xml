@@ -9,6 +9,7 @@ http://www.springframework.org/schema/security/spring-security.xsd">
 		<intercept-url pattern="/admin/*" access="hasRole('ROLE_ADMIN')" />
 		<http-basic/>
 		<logout />
+		<csrf disabled="true"/>
 	</http>
 	<authentication-manager>
 		<authentication-provider>

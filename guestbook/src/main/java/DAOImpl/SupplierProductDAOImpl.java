@@ -19,7 +19,7 @@ public class SupplierProductDAOImpl implements SupplierProductDAO{
 	@Override
 	public List<SupplierProduct> findAll() {
 
-		String sql = "SELECT * FROM SUPLLIERPRODUCT"; 
+		String sql = "SELECT * FROM SUPPLIERPRODUCT"; 
 		List<SupplierProduct> supplierProducts = jdbcTemplate.query(sql, new SupplierProductRowMapper()); 
 		return supplierProducts ;
 	}

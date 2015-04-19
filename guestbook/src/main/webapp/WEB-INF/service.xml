@@ -3,6 +3,38 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans 
 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"> 
 
+	<bean id="accountDAO" class="DAOImpl.AccountDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	
+	<bean id="authoritiesDAO" class="DAOImpl.AuthoritiesDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	
+	<bean id="customerDAO" class="DAOImpl.CustomerDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	
+	<bean id="orderDAO" class="DAOImpl.OrderDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>	
+
+	<bean id="productDAO" class="DAOImpl.ProductDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+
+	<bean id="supplierDAO" class="DAOImpl.SupplierDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+
+	<bean id="supplierProductDAO" class="DAOImpl.SupplierProductDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	
+	<bean id="usersDAO" class="DAOImpl.UsersDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.GoogleDriver"/>

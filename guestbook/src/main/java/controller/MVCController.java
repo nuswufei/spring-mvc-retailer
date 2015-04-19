@@ -6,6 +6,9 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,57 +19,51 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import DAOImpl.*;
+import DAO.*;
 import entity.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
 @Controller
-@RequestMapping("/*")
+@RequestMapping("/")
 public class MVCController {
+	private static final Logger log = Logger.getLogger( MVCController.class.getName());
 	@Autowired
-	private AccountDAOImpl accountDAO;
+	AccountDAO accountDAO;
 	
 	@Autowired
-	private AuthoritiesDAOImpl authoritiesDAO;
+	AuthoritiesDAO authoritiesDAO;
 	
 	@Autowired
-	private CustomerDAOImpl customerDAO;
+	private CustomerDAO customerDAO;
 	
 	@Autowired
-	private OrderDAOImpl orderDAO;
+	private OrderDAO orderDAO;
 	
 	@Autowired
-	private ProductDAOImpl productDAO;
+	private ProductDAO productDAO;
 	
 	@Autowired
-	private SupplierDAOImpl supplierDAO;
+	private SupplierDAO supplierDAO;
 	
 	@Autowired
-	private SupplierProductDAOImpl supplierProductDAO;
+	private SupplierProductDAO supplierProductDAO;
 	
 	@Autowired
-	private UsersDAOImpl usersDAO;
-	
+	private UsersDAO usersDAO;
 	
 	@ResponseBody
-	@RequestMapping(value="registration", method= RequestMethod.POST) 
-	@Transactional
-	public ResponseEntity<String> registration(HttpServletRequest req,
-			@PathVariable("username") String username,
-			@PathVariable("password") String password,
-			@PathVariable("name") String name,
-			@PathVariable("address") String address) {
-		Users users = new Users();
-		users.setENABLED(1);
-		users.setPassword(password);
-		users.setUserName(username);
-		usersDAO.insert(users);
+	@RequestMapping(value="test", method= RequestMethod.GET)
+	public ResponseEntity<String> registration(){
 		HttpHeaders headers = new HttpHeaders();
 	    headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
             ObjectMapper objMapper = new ObjectMapper();
-            String jsonString = objMapper.writeValueAsString(users);
+            String jsonString = objMapper.writeValueAsString("testsuccess");
             return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
         }
         catch (JsonMappingException e) {
@@ -76,6 +73,52 @@ public class MVCController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+		return null;
+	}
+	
+	@ResponseBody
+	@Transactional
+	@RequestMapping(value="registration", method= RequestMethod.POST) 
+	public ResponseEntity<String> registration(HttpServletRequest req,
+			@RequestParam("username") String username,
+			@RequestParam("password") String password,
+			@RequestParam("name") String name,
+			@RequestParam("address") String address) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		 
+		Users users = new Users();
+		users.setENABLED(1);
+		users.setPassword(password);
+		users.setUserName(username);
+		usersDAO.insert(users);
+		log.log(Level.WARNING, "userInsert");
+		
+		Authorities authority = new Authorities();
+		authority.setUsername(username);
+		authority.setAuthority("ROLE_USER");
+		authoritiesDAO.insert(authority);
+
+		Customer customer = new Customer();
+		customer.setName(name);
+		customer.setAddress(address);
+		customer.setUsername(username);
+		Customer newCustomer = customerDAO.insert(customer);
+		
+		try {
+            ObjectMapper objMapper = new ObjectMapper();
+            String jsonString = objMapper.writeValueAsString(newCustomer);
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+		
 		return null;
 	} 
 	

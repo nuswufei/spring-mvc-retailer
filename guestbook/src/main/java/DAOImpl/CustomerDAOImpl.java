@@ -47,7 +47,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 				}
 	        }, keyHolder);
 		}catch(Exception e){}
-		if(row > 0) return findByID((int)keyHolder.getKey());
+		if(row > 0) return findByID(keyHolder.getKey().intValue());
 		else return new Customer();
 	}
 
