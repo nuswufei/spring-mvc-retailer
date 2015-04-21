@@ -3,6 +3,8 @@ package controller;
 import java.io.IOException;
 
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,14 @@ import entity.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/*")
 public class MVCController {
 	private static final Logger log = Logger.getLogger( MVCController.class.getName());
 	@Autowired
@@ -58,12 +62,12 @@ public class MVCController {
 	
 	@ResponseBody
 	@RequestMapping(value="test", method= RequestMethod.GET)
-	public ResponseEntity<String> registration(){
+	public ResponseEntity<String> hello(HttpServletRequest req){
 		HttpHeaders headers = new HttpHeaders();
 	    headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
             ObjectMapper objMapper = new ObjectMapper();
-            String jsonString = objMapper.writeValueAsString("testsuccess");
+            String jsonString = objMapper.writeValueAsString("id：" + req.getRemoteUser());
             return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
         }
         catch (JsonMappingException e) {
@@ -121,6 +125,152 @@ public class MVCController {
 		
 		return null;
 	} 
+	
+	@ResponseBody
+	@RequestMapping(value="product/all", method= RequestMethod.GET) 
+	public ResponseEntity<String> showAllProducts() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		List<SupplierProduct> lst = supplierProductDAO.findAll();
+		try {
+			ObjectMapper objMapper = new ObjectMapper().setVisibility(JsonMethod.FIELD, Visibility.ANY);
+            class Item {
+            	String name;
+            	int price;
+            	String supplier;
+            	String supplierAddress;
+            	String discount;
+            }
+            List<Item> resLst = new ArrayList<Item>();
+            for(SupplierProduct sp : lst) {
+            	Product product = productDAO.findByID(sp.getProductID());
+            	Supplier supplier = supplierDAO.findByID(sp.getSupplierID());
+    			Item item = new Item();
+    			item.name = product.getName();
+    			item.price = product.getPrice();
+    			item.supplier = supplier.getName();
+    			item.discount = sp.getDiscount();
+    			item.supplierAddress = supplier.getAddress();
+    			resLst.add(item);
+    		}
+            String jsonString = objMapper.writeValueAsString(resLst);
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		return null;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="user/addaccount", method= RequestMethod.POST) 
+	public void addAccount(HttpServletRequest req,
+			@RequestParam("accountnumber") String accountNumber,
+			@RequestParam("bankname") String bankName) throws Exception {
+		Account account = new Account();
+		account.setAccountNumber(accountNumber);
+		account.setBankName(bankName);
+		String username = req.getRemoteUser();
+		int customerID = customerDAO.findIDByUsername(username);
+		account.setCustomerID(customerID);
+		accountDAO.insert(account);
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="user/addorder", method= RequestMethod.POST) 
+	public void addOrder(HttpServletRequest req,
+			@RequestParam("accountnumber") String accountNumber,
+			@RequestParam("productID") int productID,
+			@RequestParam("supplierID") int supplierID,
+			@RequestParam("number") int number) throws Exception {
+		Order order = new Order();
+		order.setAccountNumber(accountNumber);
+		order.setNumber(number);
+		order.setProductID(productID);
+		order.setSupplierID(supplierID);
+		orderDAO.insert(order);
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="user/order", method= RequestMethod.GET) 
+	public ResponseEntity<String> getOrder(HttpServletRequest req) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+	    
+		int customerID = customerDAO.findIDByUsername(req.getRemoteUser());
+		List<Account> accList = accountDAO.findAllByUserID(customerID);
+		List<Order> orderList = new ArrayList<Order>();
+		for(Account acc : accList) {
+			List<Order> temp = orderDAO.findByAccountNumber(acc.getAccountNumber());
+			orderList.addAll(temp);
+		}
+		
+		try {
+			ObjectMapper objMapper = new ObjectMapper().setVisibility(JsonMethod.FIELD, Visibility.ANY);
+            class Item {
+            	String productName;
+            	double productPrice;
+            	String supplierName;
+            	String accountNumber;
+            	String supplierAddress;
+            	int number;
+            }
+            List<Item> resLst = new ArrayList<Item>();
+            for(Order order : orderList) {
+            	Product product = productDAO.findByID(order.getProductID());
+            	Supplier supplier = supplierDAO.findByID(order.getSupplierID());
+            	List<SupplierProduct> sps = supplierProductDAO.findByID(supplier.getId(), product.getId());
+    			Item item = new Item();
+    			item.productName = product.getName();
+    			item.productPrice = order.getNumber() * product.getPrice() * Double.parseDouble(sps.get(0).getDiscount());
+    			item.supplierName = supplier.getName();
+    			item.accountNumber = order.getAccountNumber();
+    			item.number = order.getNumber();
+    			item.supplierAddress = supplier.getAddress();
+    			resLst.add(item);
+    		}
+            String jsonString = objMapper.writeValueAsString(resLst);
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		return null;
+		
+	}
+	@ResponseBody
+	@RequestMapping(value="user/account", method= RequestMethod.GET) 
+	public ResponseEntity<String> getAccount(HttpServletRequest req) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		String username = req.getRemoteUser();
+		int customerID = customerDAO.findIDByUsername(username);
+		List<Account> lst = accountDAO.findAllByUserID(customerID);
+		try {
+            ObjectMapper objMapper = new ObjectMapper();
+            String jsonString = "";
+            for(Account acc : lst) {
+    			jsonString += objMapper.writeValueAsString(acc);
+    		}
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		return null;
+	}
 	
 	@RequestMapping(value="user/logout", method= RequestMethod.GET) 
 	@Transactional

@@ -14,7 +14,7 @@ public class SupplierProductRowMapper implements RowMapper<SupplierProduct>{
 		supplierProduct.setProductID(rs.getInt("productID"));
 		supplierProduct.setSupplierID(rs.getInt("supplierID"));
 		supplierProduct.setDiscount(rs.getString("discount"));
-		return null;
+		return supplierProduct;
 	}
 
 }

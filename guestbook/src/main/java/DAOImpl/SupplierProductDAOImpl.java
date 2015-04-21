@@ -18,10 +18,17 @@ public class SupplierProductDAOImpl implements SupplierProductDAO{
 	}
 	@Override
 	public List<SupplierProduct> findAll() {
-
 		String sql = "SELECT * FROM SUPPLIERPRODUCT"; 
 		List<SupplierProduct> supplierProducts = jdbcTemplate.query(sql, new SupplierProductRowMapper()); 
 		return supplierProducts ;
 	}
+	@Override
+	public List<SupplierProduct> findByID(int sid, int pid) {
+		SupplierProduct supplierProduct = new SupplierProduct();
+		String sql = "SELECT * FROM SUPPLIERPRODUCT WHERE supplierID = ? AND productID = ?";
+		List<SupplierProduct> supplierProducts = jdbcTemplate.query(sql, new Object[]{sid, pid}, new SupplierProductRowMapper());
+		return supplierProducts;
+	}
+	
 
 }

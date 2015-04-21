@@ -17,7 +17,7 @@ public class OrderDAOImpl implements OrderDAO {
 	}
 	@Override
 	public void insert(Order order) {
-		String sql = "INSERT IGNOR INTO ORDER " +
+		String sql = "INSERT IGNORE INTO ORDERS " +
 				"(accountNumber, supplierID, productID, number) "
 				+ "VALUES (?, ?, ?, ?)";
 		jdbcTemplate.update(sql, 
@@ -28,9 +28,9 @@ public class OrderDAOImpl implements OrderDAO {
 
 	@Override
 	public List<Order> findByAccountNumber(String accountNumber) {
-		String sql = "SELECT * FROM ACCOUNT WHERE accountNumber = ?"; 
+		String sql = "SELECT * FROM ORDERS WHERE accountNumber = ?"; 
 		List<Order> orders = jdbcTemplate.query(sql, new Object[]{accountNumber}, new OrderRowMapper()); 
 		return orders; 
 	}
-
+	
 }

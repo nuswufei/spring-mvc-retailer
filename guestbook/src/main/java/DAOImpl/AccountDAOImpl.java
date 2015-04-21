@@ -19,8 +19,8 @@ public class AccountDAOImpl implements AccountDAO{
 	@Override
 	public void insert(Account account) {
 		String sql = "INSERT IGNORE INTO ACCOUNT " +
-				"(accountNumber, bankName, CustomerID) "
-				+ "VALUES (?, ?)";
+				"(accountNumber, bankName, customerID) "
+				+ "VALUES (?, ?, ?)";
 		jdbcTemplate.update(sql, 
 		new Object[]{account.getAccountNumber(), account.getBankName(), account.getCustomerID()});
 	}
