@@ -29,6 +29,19 @@ public class SupplierProductDAOImpl implements SupplierProductDAO{
 		List<SupplierProduct> supplierProducts = jdbcTemplate.query(sql, new Object[]{sid, pid}, new SupplierProductRowMapper());
 		return supplierProducts;
 	}
-	
+	@Override
+	public List<SupplierProduct> searchByName(String namelike) {
+		String sql = "SELECT * FROM SUPPLIERPRODUCT INNER JOIN PRODUCT ON SUPPLIERPRODUCT.productID = PRODUCT.id WHERE PRODUCT.name LIKE ?"; 
+		List<SupplierProduct> supplierProducts = jdbcTemplate.query(sql, new Object[]{"%" + namelike + "%"}, new SupplierProductRowMapper()); 
+		return supplierProducts ;
+	}
+	@Override
+	public void insert(SupplierProduct supplierProduct) {
+		String sql = "INSERT IGNORE INTO SUPPLIERPRODUCT " +
+				"VALUES (?, ?, ?)";
+		jdbcTemplate.update(sql, 
+				new Object[]{supplierProduct.getSupplierID(),supplierProduct.getProductID(), supplierProduct.getDiscount()});
+		
+	}
 
 }

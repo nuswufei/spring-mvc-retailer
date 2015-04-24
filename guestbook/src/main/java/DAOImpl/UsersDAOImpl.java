@@ -21,5 +21,13 @@ public class UsersDAOImpl implements UsersDAO{
 		jdbcTemplate.update(sql, 
 			new Object[]{users.getUserName(), users.getPassword(), users.getENABLED()});
 	}
+	@Override
+	public void updatePassword(String username, String password) {
+		String sql = "UPDATE users " +
+				"SET PASSWORD = ? "
+				+ "WHERE USERNAME = ?";
+	jdbcTemplate.update(sql, 
+		new Object[]{password, username});
+	}
 
 }

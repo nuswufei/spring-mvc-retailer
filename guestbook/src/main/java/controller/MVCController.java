@@ -80,6 +80,80 @@ public class MVCController {
 		return null;
 	}
 	
+	@Transactional
+	@RequestMapping(value = "admin/addproduct", method = RequestMethod.POST)
+	public void addProduct(HttpServletRequest req,
+			@RequestParam("name") String name,
+			@RequestParam("price") Integer price){
+		Product product = new Product();
+		product.setName(name);
+		product.setPrice(price);
+		productDAO.insert(product);
+	}
+	
+	@RequestMapping(value = "vendo/addproduct", method = RequestMethod.POST)
+	public void startSellProduct(HttpServletRequest req,
+			@RequestParam("name") String name,
+			@RequestParam("discount") String discount){
+		Product product = productDAO.findByName(name);
+		Supplier supplier = supplierDAO.findByName(req.getRemoteUser());
+		SupplierProduct supplierProduct = new SupplierProduct();
+		supplierProduct.setDiscount(discount);
+		supplierProduct.setProductID(product.getId());
+		supplierProduct.setSupplierID(supplier.getId());
+		
+	}
+	
+	@ResponseBody
+	@Transactional
+	@RequestMapping(value="admin/addvendor", method = RequestMethod.POST) 
+	public ResponseEntity<String> addvendor(HttpServletRequest req,
+			@RequestParam("username") String username,
+			@RequestParam("password") String password,
+			@RequestParam("address") String address) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		 
+		Users users = new Users();
+		users.setENABLED(1);
+		users.setPassword(password);
+		users.setUserName(username);
+		usersDAO.insert(users);
+		
+		Authorities authority = new Authorities();
+		authority.setUsername(username);
+		authority.setAuthority("ROLE_VENDO");
+		authoritiesDAO.insert(authority);
+
+		Supplier supplier = new Supplier();
+		supplier.setAddress(address);
+		supplier.setName(username);
+		Supplier newSupplier = supplierDAO.insert(supplier);
+		
+		try {
+            ObjectMapper objMapper = new ObjectMapper();
+            String jsonString = objMapper.writeValueAsString(newSupplier);
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }		
+		return null;
+	} 
+	
+	@Transactional
+	@RequestMapping(value="user/updatepassword", method= RequestMethod.POST) 
+	public void updatePassword(HttpServletRequest req,
+			@RequestParam("password") String password) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		usersDAO.updatePassword(req.getRemoteUser(), password);
+	} 
+	
 	@ResponseBody
 	@Transactional
 	@RequestMapping(value="registration", method= RequestMethod.POST) 
@@ -120,11 +194,50 @@ public class MVCController {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-		
-		
+        }		
 		return null;
 	} 
+	
+	@ResponseBody
+	@RequestMapping(value="product/search", method= RequestMethod.GET) 
+	public ResponseEntity<String> searchProducts(
+			@RequestParam("namelike") String namelike) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+	    List<SupplierProduct> lst = supplierProductDAO.searchByName(namelike);
+		try {
+			ObjectMapper objMapper = new ObjectMapper().setVisibility(JsonMethod.FIELD, Visibility.ANY);
+            class Item {
+            	String name;
+            	int price;
+            	String supplier;
+            	String supplierAddress;
+            	String discount;
+            }
+            List<Item> resLst = new ArrayList<Item>();
+            for(SupplierProduct sp : lst) {
+            	Product product = productDAO.findByID(sp.getProductID());
+            	Supplier supplier = supplierDAO.findByID(sp.getSupplierID());
+    			Item item = new Item();
+    			item.name = product.getName();
+    			item.price = product.getPrice();
+    			item.supplier = supplier.getName();
+    			item.discount = sp.getDiscount();
+    			item.supplierAddress = supplier.getAddress();
+    			resLst.add(item);
+    		}
+            String jsonString = objMapper.writeValueAsString(resLst);
+            return new ResponseEntity<String>(jsonString, headers, HttpStatus.OK);
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		return null;
+	}
 	
 	@ResponseBody
 	@RequestMapping(value="product/all", method= RequestMethod.GET) 
